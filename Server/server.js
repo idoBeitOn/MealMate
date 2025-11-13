@@ -1,0 +1,21 @@
+import express from 'express';
+import cors from 'cors';
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+
+dotenv.config(); // Load environment variables from .env file
+
+const app = express();// Create an Express application - the actual server
+app.use(cors()); // Enable CORS for all routes
+app.use(express.json()); // Middleware to parse JSON bodies - Allows the server to understand JSON in requests (POST, PUT, etc.)
+
+const PORT = process.env.PORT || 8080; //The port which the server listens to,
+                                      // Use the PORT from environment variables or default to 8080
+
+app.get("/", (res) => { //
+  res.send("MealMate backend is running!");
+});
+
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+})
