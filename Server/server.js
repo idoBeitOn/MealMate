@@ -12,10 +12,19 @@ app.use(express.json()); // Middleware to parse JSON bodies - Allows the server 
 const PORT = process.env.PORT || 8080; //The port which the server listens to,
                                       // Use the PORT from environment variables or default to 8080
 
-app.get("/", (res) => { //
+app.get("/", (req, res) => { //
   res.send("MealMate backend is running!");
 });
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 })
+
+
+// Connect to MongoDB using Mongoose
+mongoose.connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+})
+.then(() => console.log(" MongoDB connected"))
+.catch((err) => console.log(" MongoDB connection error:", err));
