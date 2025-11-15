@@ -28,7 +28,8 @@ const recipeSchema = new mongoose.Schema({
   author: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, 
   images: [{ type: String }],                                  
   isPublic: { type: Boolean, default: true },                   
-  likesCount: { type: Number, default: 0 }                      
+  likesCount: { type: Number, default: 0 },
+  likedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', default: []  }]                      
 }, {
   timestamps: true // Automatically manage createdAt and updatedAt fields
 });

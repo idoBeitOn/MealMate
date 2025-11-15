@@ -60,7 +60,7 @@ export const getAllRecipes = async (req, res) => {
     try {
         const recipes = await Recipe.find()
             .populate('author', 'username email') 
-            .populate('category', 'name')         
+          //  .populate('category', 'name')         
             .sort({ createdAt: -1 });             
 
         res.status(200).json(recipes);
@@ -72,3 +72,37 @@ export const getAllRecipes = async (req, res) => {
 
 
 
+
+export const toggleLikeRecipe = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const recipeId = req.params.id;
+
+        const recipe = await Recipe.findById(recipeId);
+        if (!recipe) {
+            return res.status(404).json({ message: "Recipe not found" });
+        }
+
+        if (!recipe.likedBy) recipe.likedBy = [];
+
+        const index = recipe.likedBy.indexOf(userId);
+
+        if (index === -1) {
+            recipe.likedBy.push(userId);
+        } else {
+            recipe.likedBy.splice(index, 1);
+        }
+
+        recipe.likesCount = recipe.likedBy.length;
+
+        await recipe.save();
+        res.status(200).json({ 
+            message: index === -1 ? "Liked" : "Unliked",
+            likesCount: recipe.likesCount 
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+};
