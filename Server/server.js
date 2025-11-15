@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import authRouter from './routes/authRoutes.js';
 
 dotenv.config(); // Load environment variables from .env file
 
@@ -28,3 +29,7 @@ mongoose.connect(process.env.MONGO_URI, {
 })
 .then(() => console.log(" MongoDB connected"))
 .catch((err) => console.log(" MongoDB connection error:", err));
+
+
+// Use the auth routes for any requests to /api/auth
+app.use('/api/auth', authRouter);
