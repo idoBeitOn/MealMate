@@ -1,7 +1,7 @@
-import User from '../models/userModel.js';
+import User from '../models/Server/models/UserModel.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import e from 'express';
+
 
 
 export const register = async (req, res) => {
@@ -56,7 +56,7 @@ export const login = async (req, res) => {
         }
 
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '5h' });
-        res.status(201).json({
+        res.status(200).json({
              token,
              user: {
                 id: user._id,
@@ -68,3 +68,6 @@ export const login = async (req, res) => {
         res.status(500).json({ message: 'Server error' });      
     }
 }
+
+
+app.use('/api/auth', authRouter);
