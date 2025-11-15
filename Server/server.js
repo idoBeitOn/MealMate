@@ -3,6 +3,7 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import authRouter from './routes/authRoutes.js';
+import recipesRouter from './routes/recipeRoutes.js';
 
 dotenv.config(); // Load environment variables from .env file
 
@@ -12,6 +13,12 @@ app.use(express.json()); // Middleware to parse JSON bodies - Allows the server 
 
 const PORT = process.env.PORT || 8080; //The port which the server listens to,
                                       // Use the PORT from environment variables or default to 8080
+
+// Use the auth routes for any requests to /api/auth
+app.use('/api/auth', authRouter);
+
+// Use the recipe routes for any requests to /api/recipes
+app.use('/api/recipes', recipesRouter);
 
 app.get("/", (req, res) => { //
   res.send("MealMate backend is running!");
@@ -31,5 +38,3 @@ mongoose.connect(process.env.MONGO_URI, {
 .catch((err) => console.log(" MongoDB connection error:", err));
 
 
-// Use the auth routes for any requests to /api/auth
-app.use('/api/auth', authRouter);
