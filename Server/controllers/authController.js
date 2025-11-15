@@ -1,4 +1,4 @@
-import User from '../models/Server/models/UserModel.js';
+import User from '../models/UserModel.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 
@@ -69,5 +69,3 @@ export const login = async (req, res) => {
     }
 }
 
-
-app.use('/api/auth', authRouter);

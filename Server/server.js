@@ -20,6 +20,8 @@ app.use('/api/auth', authRouter);
 // Use the recipe routes for any requests to /api/recipes
 app.use('/api/recipes', recipesRouter);
 
+
+
 app.get("/", (req, res) => { //
   res.send("MealMate backend is running!");
 });

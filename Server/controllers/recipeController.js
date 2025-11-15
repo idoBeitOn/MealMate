@@ -59,9 +59,9 @@ export const createRecipe = async (req, res) => {
 export const getAllRecipes = async (req, res) => {
     try {
         const recipes = await Recipe.find()
-            .populate('author', 'username email') // מציג שם יוצר
-            .populate('category', 'name')         // מציג שם קטגוריה
-            .sort({ createdAt: -1 });             // מהחדש לישן
+            .populate('author', 'username email') 
+            .populate('category', 'name')         
+            .sort({ createdAt: -1 });             
 
         res.status(200).json(recipes);
 
@@ -69,3 +69,6 @@ export const getAllRecipes = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
+
+
+
