@@ -173,3 +173,45 @@ export const searchRecipes = async (req, res) => {
         res.status(500).json({ message: "Server error", error: error.message });
     }
 };
+
+
+export const updateRecipe = async (req, res) => {
+    try {
+        const recipeId = req.params.id;
+        if (!mongoose.Types.ObjectId.isValid(recipeId)) {
+            return res.status(400).json({ message: "Invalid recipe ID" });
+        }
+
+        const recipe = await Recipe.findById(recipeId);
+        if (!recipe) {
+            return res.status(404).json({ message: "Recipe not found" });
+        }
+
+        if (recipe.author.toString() !== req.user.id) {
+            return res.status(403).json({ message: "You are not authorized to update this recipe" });
+        }
+
+        const allowedFields = [
+            "title", "description", "ingredients", "steps",
+            "nutrition", "cookTime", "difficulty",
+            "category", "images", "isPublic"
+        ];
+
+        allowedFields.forEach(field => {
+            if (req.body[field] !== undefined) {
+                recipe[field] = req.body[field];
+            }
+        });
+        
+        await recipe.save();
+        const updatedRecipe = await Recipe.findById(recipeId)
+            .populate("author", "username email")
+            .populate("category", "name");
+
+        res.status(200).json({ message: "Recipe updated successfully", recipe: updatedRecipe });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+};
+
