@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import authRouter from './routes/authRoutes.js';
 import recipesRouter from './routes/recipeRoutes.js';
+import commentRoutes from "./routes/commentRoutes.js";
 
 dotenv.config(); // Load environment variables from .env file
 
@@ -19,6 +20,8 @@ app.use('/api/auth', authRouter);
 
 // Use the recipe routes for any requests to /api/recipes
 app.use('/api/recipes', recipesRouter);
+
+app.use("/api/comments", commentRoutes);
 
 
 
