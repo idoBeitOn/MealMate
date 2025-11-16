@@ -1,5 +1,6 @@
 import Recipe from "../models/RecipeModel.js";
-
+import CategoryModel from "../models/CategoryModel.js";
+import mongoose from "mongoose";
 
 export const createRecipe = async (req, res) => {
     try {
@@ -54,13 +55,11 @@ export const createRecipe = async (req, res) => {
     }
 };
 
-    
-
 export const getAllRecipes = async (req, res) => {
     try {
         const recipes = await Recipe.find()
             .populate('author', 'username email') 
-          //  .populate('category', 'name')         
+            .populate('category', 'name')         
             .sort({ createdAt: -1 });             
 
         res.status(200).json(recipes);
@@ -69,9 +68,6 @@ export const getAllRecipes = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
-
-
-
 
 export const toggleLikeRecipe = async (req, res) => {
     try {
@@ -100,6 +96,77 @@ export const toggleLikeRecipe = async (req, res) => {
             message: index === -1 ? "Liked" : "Unliked",
             likesCount: recipe.likesCount 
         });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+};
+
+export const searchRecipes = async (req, res) => {
+    try {
+        
+        const {
+            q,                  
+            category,           
+            difficulty,         
+            maxCookTime,        
+            sortBy,             
+            author,             
+            model               
+        } = req.query;
+
+        
+        let filter = {};
+
+        if (q) {
+            
+            filter.$text = { $search: q };
+        }
+
+        if (category && mongoose.Types.ObjectId.isValid(category)) {
+            filter.category = category;
+        }
+
+        if (difficulty) {
+            filter.difficulty = difficulty;
+        }
+
+        if (maxCookTime) {
+            filter.cookTime = { $lte: Number(maxCookTime) };
+        }
+
+        if (author && mongoose.Types.ObjectId.isValid(author)) {
+            filter.author = author;
+        }
+
+        if (model) {
+            filter.model = model;
+        }
+
+        
+        let sort = { createdAt: -1 }; 
+
+        if (sortBy === "likes") {
+            sort = { likesCount: -1 }; 
+        } else if (sortBy === "createdAt") {
+            sort = { createdAt: -1 }; 
+        } else if (sortBy === "trending") {
+            
+            const sevenDaysAgo = new Date();
+            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+            filter.createdAt = { $gte: sevenDaysAgo };
+            sort = { likesCount: -1 };
+        }
+
+        
+        const recipes = await Recipe.find(filter)
+            .populate('author', 'username email')   
+            .populate('category', 'name')           
+            .sort(sort);                             
+
+        
+        res.status(200).json(recipes);
 
     } catch (error) {
         console.error(error);
