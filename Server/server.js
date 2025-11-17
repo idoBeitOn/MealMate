@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import authRouter from './routes/authRoutes.js';
 import recipesRouter from './routes/recipeRoutes.js';
 import commentRoutes from "./routes/commentRoutes.js";
+import mealRoutes from "./routes/mealRoutes.js";
 
 dotenv.config(); // Load environment variables from .env file
 
@@ -22,6 +23,9 @@ app.use('/api/auth', authRouter);
 app.use('/api/recipes', recipesRouter);
 
 app.use("/api/comments", commentRoutes);
+
+app.use("/api/meals", mealRoutes);
+
 
 
 
@@ -41,5 +45,6 @@ mongoose.connect(process.env.MONGO_URI, {
 })
 .then(() => console.log(" MongoDB connected"))
 .catch((err) => console.log(" MongoDB connection error:", err));
+
 
 
