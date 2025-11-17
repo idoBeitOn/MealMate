@@ -5,7 +5,8 @@ import dotenv from 'dotenv';
 import authRouter from './routes/authRoutes.js';
 import recipesRouter from './routes/recipeRoutes.js';
 import commentRoutes from "./routes/commentRoutes.js";
-import mealRoutes from "./routes/mealRoutes.js";
+import mealRouter from "./routes/mealRoutes.js";
+import shoppingListrouter from "./routes/shoppingListrouter.js"
 
 dotenv.config(); // Load environment variables from .env file
 
@@ -24,7 +25,9 @@ app.use('/api/recipes', recipesRouter);
 
 app.use("/api/comments", commentRoutes);
 
-app.use("/api/meals", mealRoutes);
+app.use("/api/meals", mealRouter);
+
+app.use("/api/shopping-list", shoppingListrouter);
 
 
 
