@@ -240,3 +240,63 @@ export const deleteRecipe = async (req, res) => {
     }
 };
 
+
+
+
+
+// --- Add recipe to favorites ---
+export const addFavorite = async (req, res) => {
+    try {
+        const { recipeId } = req.params;
+        const { userId } = req.body;
+
+        if (!userId) {
+            return res.status(400).json({ message: "Missing userId" });
+        }
+
+        const recipe = await Recipe.findById(recipeId);
+        if (!recipe) return res.status(404).json({ message: "Recipe not found" });
+
+        // Prevent duplicates
+        if (recipe.favoritedBy.includes(userId)) {
+            return res.status(400).json({ message: "Already favorited" });
+        }
+
+        recipe.favoritedBy.push(userId);
+        await recipe.save();
+
+        res.status(200).json({ message: "Recipe favorited", recipe });
+
+    } catch (error) {
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+};
+
+
+// --- Remove recipe from favorites ---
+export const removeFavorite = async (req, res) => {
+    try {
+        const { recipeId } = req.params;
+        const { userId } = req.body;
+
+        if (!userId) {
+            return res.status(400).json({ message: "Missing userId" });
+        }
+
+        const recipe = await Recipe.findById(recipeId);
+        if (!recipe) return res.status(404).json({ message: "Recipe not found" });
+
+        recipe.favoritedBy = recipe.favoritedBy.filter(
+            (id) => id.toString() !== userId
+        );
+
+        await recipe.save();
+
+        res.status(200).json({ message: "Recipe removed from favorites", recipe });
+
+    } catch (error) {
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+};
+
+
