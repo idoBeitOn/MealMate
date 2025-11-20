@@ -1,6 +1,7 @@
 import { useState } from "react";
 
-function AuthForm({ type }) {
+function AuthForm() {
+  const [type, setType] = useState("login"); // "login" או "register"
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -10,51 +11,74 @@ function AuthForm({ type }) {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-r from-purple-400 to-indigo-600">
-      <div className="bg-white/30 backdrop-blur-md p-10 rounded-3xl shadow-xl w-full max-w-lg border border-white/20">
-        <h2 className="text-3xl font-bold text-center text-gray-100 mb-6">
-          {type === "login" ? "Welcome Back" : "Create Account"}
-        </h2>
+    <div className="min-h-screen w-full flex flex-col items-center bg-gradient-to-b from-white to-gray-50">
+      <header className="w-full sticky top-0 z-20">
+        <div className="max-w-5xl mx-auto px-6 py-8 flex flex-col items-center">
+          <div className="flex flex-col items-center">
+            <h1 className="text-5xl sm:text-6xl font-extrabold tracking-tight text-center text-gray-900">
+              MealMate
+            </h1>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label className="block text-gray-100 mb-2">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              className="w-full px-4 py-2 border border-white/40 rounded-lg bg-white/20 text-gray-900 placeholder-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-              required
-            />
+            <p className="mt-6 text-center max-w-2xl text-lg sm:text-xl font-semibold text-gray-600 leading-snug">
+              Share recipes. Plan your week. Generate shopping lists — all in one place.
+            </p>
+
+            <div className="mt-3 text-center max-w-2xl text-lg sm:text-xl font-semibold text-gray-600 leading-snug">
+              Your kitchen, simplified.
+            </div>
           </div>
+        </div>
+      </header>
 
-          <div>
-            <label className="block text-gray-100 mb-2">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="********"
-              className="w-full px-4 py-2 border border-white/40 rounded-lg bg-white/20 text-gray-900 placeholder-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-              required
-            />
-          </div>
+      <div className="flex-1 w-full flex items-center justify-center px-6 py-12">
+        <div className="bg-white p-10 rounded-3xl shadow-md w-full max-w-lg border border-gray-200 text-center">
+          <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
+            {type === "login" ? "Welcome Back" : "Create Account"}
+          </h2>
 
-          <button
-            type="submit"
-            className="w-full bg-indigo-500/80 text-white py-2 rounded-lg font-semibold hover:bg-indigo-600/90 transition"
-          >
-            {type === "login" ? "Login" : "Register"}
-          </button>
-        </form>
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label className="block text-gray-700 mb-2">Email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                className="w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200"
+                required
+              />
+            </div>
 
-        <p className="mt-6 text-center text-gray-200">
-          {type === "login" ? "Don't have an account?" : "Already have an account?"}{" "}
-          <span className="text-indigo-200 font-semibold cursor-pointer hover:underline">
-            {type === "login" ? "Register" : "Login"}
-          </span>
-        </p>
+            <div>
+              <label className="block text-gray-700 mb-2">Password</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="********"
+                className="w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200"
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="w-full bg-gray-800 text-white py-2 rounded-lg font-semibold hover:bg-gray-900 transition"
+            >
+              {type === "login" ? "Login" : "Register"}
+            </button>
+          </form>
+
+          <p className="mt-6 text-center text-gray-600">
+            {type === "login" ? "Don't have an account?" : "Already have an account?"}{" "}
+            <span
+              className="text-gray-800 font-semibold cursor-pointer hover:underline"
+              onClick={() => setType(type === "login" ? "register" : "login")}
+            >
+              {type === "login" ? "Register" : "Login"}
+            </span>
+          </p>
+        </div>
       </div>
     </div>
   );
