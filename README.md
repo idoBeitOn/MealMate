@@ -1,47 +1,77 @@
-# MealMate – Backend Service
+# 🍽️ MealMate — Smart Meal Planning & Shopping List Backend
 
-MealMate is a backend service for managing meals, users, preferences, and personalized meal recommendations.  
-The service is built with **Node.js**, **Express**, and **MongoDB**, following a clean and scalable layered architecture.
+A clean and scalable **Node.js + Express + MongoDB** backend for managing recipes, meals, users, comments, favorites, and automatically generated shopping lists.  
+Built with a **layered architecture** (controllers → models) and production-style API design.
+
+---
 
 ## 🚀 Features
 
-- User management: registration, login, profile
-- Meal management (CRUD operations)
-- User dietary preferences & restrictions
-- Recommendation engine based on user profile and meal metadata
-- Image upload support (Cloudinary or local)
-- JWT Authentication & role-based access
-- Input validation with Joi
-- Centralized error handling & logging
-- Environment-based configuration
-- Separation into Controllers, Services, and Repositories for clean maintainability
+### 👤 User Management
+- JWT-based authentication  
+- Secure password hashing  
+- Login & registration APIs  
+
+### 📚 Recipe System
+- Create / update / delete recipes  
+- Each recipe contains ingredients, steps, metadata  
+- Like & unlike recipes  
+- Save favorites  
+- Search recipes  
+- Fetch all recipes or by user  
+
+### 🍽️ Meal Planning
+- Assign recipes to meals throughout the week  
+- Manage weekly meal schedules  
+- Fetch all meals for a user  
+- Update or delete meals  
+
+### 🛒 Smart Shopping Lists (Auto-Generated)
+- Generates a complete shopping list based on the user’s meals  
+- **Deduplicates ingredients** across all recipes  
+- Supports manual item additions  
+- Toggle “purchased” state  
+- Remove items  
+- Shopping list auto-synchronizes when meals update  
+
+---
 
 
-## 📡 API Endpoints (Examples)
 
-### Auth
+## 🧪 Tech Stack
+
+- **Node.js**  
+- **Express.js**  
+- **MongoDB + Mongoose**  
+- **JWT Authentication**  
+- **Bcrypt**  
+- **REST API Design**  
+
+---
+
+## 📄 API Highlights
+
+### 🔑 Authentication
 - `POST /auth/register`
 - `POST /auth/login`
 
-### Meals
-- `POST /meals`
-- `GET /meals`
-- `GET /meals/:id`
-- `PUT /meals/:id`
-- `DELETE /meals/:id`
+### 🥘 Recipes
+- `POST /recipes` — Create recipe  
+- `GET /recipes` — Get all recipes  
+- `POST /recipes/:id/like` — Like/unlike  
+- `POST /recipes/:id/favorite` — Add to favorites  
+- `GET /recipes/search` — Search  
 
-### Preferences
-- `GET /preferences/:userId`
-- `PUT /preferences/:userId`
+### 🍽️ Meals
+- `POST /meals` — Create meal  
+- `GET /meals/:userId` — Get all user meals  
+- `PUT /meals/:mealId` — Update meal  
+- `DELETE /meals/:mealId` — Delete meal  
 
-### Recommendations
-- `GET /recommendations/:userId`
+### 🛒 Shopping List
+- `GET /shopping-list/:userId` — Auto-generate list  
+- `POST /shopping-list/:userId/items` — Add manual item  
+- `DELETE /shopping-list/:userId/items/:itemId` — Delete item  
+- `PUT /shopping-list/:userId/items/:itemId/toggle` — Toggle purchased  
 
-## 🗄 Technologies
 
-- **Node.js** (Express)
-- **MongoDB** with Mongoose
-- **JWT Authentication**
-- **Cloudinary / Multer** for image uploads
-- **Joi** schema validation
-- **Dotenv** for environment variables
