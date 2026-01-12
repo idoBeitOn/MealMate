@@ -38,8 +38,19 @@ export const createRecipe = async (req, res) => {
             difficulty: difficulty || 'easy',
             category: category || null, // NOT "General"
             images: images || [],
+            //If the user explicitly sends true or false, use it; otherwise, default to true.
+            //ternary operator combined with JavaScript type checking.
+            /*
+            typeof returns the type of a value.
+            typeof 10        // "number"
+            typeof "hello"   // "string"
+            typeof true      // "boolean"
+            typeof null      // "object"
+            typeof undefined // "undefined"
+
+            */
             isPublic: typeof isPublic === 'boolean' ? isPublic : true,
-            author: req.user.id
+            author: req.user.id// The logged-in user's ID
         });
 
         await newRecipe.save();
@@ -55,9 +66,18 @@ export const createRecipe = async (req, res) => {
     }
 };
 
+
+
+
+/*
+retrieves all recipes from the database,
+enriches them with referenced data (author & category), sorts them by newest first, and returns them.
+
+*/
 export const getAllRecipes = async (req, res) => {
     try {
-        const recipes = await Recipe.find()
+        const recipes = await Recipe.find()//without filters → returns ALL recipes
+                                           //await means the function pauses while MongoDB runs the query
             .populate('author', 'username email') 
             .populate('category', 'name')         
             .sort({ createdAt: -1 });             
@@ -71,8 +91,8 @@ export const getAllRecipes = async (req, res) => {
 
 export const toggleLikeRecipe = async (req, res) => {
     try {
-        const userId = req.user.id;
-        const recipeId = req.params.id;
+        const userId = req.user.id;//req.user.id comes from your auth middleware (JWT).
+        const recipeId = req.params.id;//recipe ID from URL parameter.
 
         const recipe = await Recipe.findById(recipeId);
         if (!recipe) {
@@ -103,10 +123,25 @@ export const toggleLikeRecipe = async (req, res) => {
     }
 };
 
+
+
+/*
+Supports:
+Full-text search
+Category filter
+Difficulty filter
+Max cook time filter
+Filter by author
+Filter by model type
+Sorting (likes, date, trending)
+Population of referenced fields
+*/
+
 export const searchRecipes = async (req, res) => {
     try {
         
         const {
+            //Query parameters from the URL
             q,                  
             category,           
             difficulty,         
@@ -116,11 +151,25 @@ export const searchRecipes = async (req, res) => {
             model               
         } = req.query;
 
-        
+        //Build a filter object dynamically
         let filter = {};
 
         if (q) {
-            
+            /*
+            In MongoDB, any key that starts with $ is not a normal field — it is a MongoDB operator.
+            | Operator  | What it does                    |
+            | --------- | ------------------------------- |
+            | `$text`   | full-text search                |
+            | `$search` | the text you want to search for |
+            | `$gte`    | greater than or equal           |
+            | `$lte`    | less than or equal              |
+            | `$or`     | logical OR                      |
+            | `$in`     | matches any value in an array   |
+            | `$set`    | update field                    |
+            | `$push`   | push into array                 |
+            Search for documents that match the text ‘text’ in any fields that have a full-text index
+            If the user typed something in ?q=... → perform text search
+            */
             filter.$text = { $search: q };
         }
 
@@ -175,6 +224,18 @@ export const searchRecipes = async (req, res) => {
 };
 
 
+
+/*
+This endpoint updates an existing recipe only if:
+The recipe ID is valid
+The recipe exists
+The logged-in user is the author of the recipe
+Only allowed fields are updated.
+
+
+
+*/
+
 export const updateRecipe = async (req, res) => {
     try {
         const recipeId = req.params.id;
@@ -187,16 +248,31 @@ export const updateRecipe = async (req, res) => {
             return res.status(404).json({ message: "Recipe not found" });
         }
 
+        /*
+        recipe.author is an ObjectId -> we convert it to string to compare with req.user.id (string).
+        req.user.id comes from the JWT middleware.
+        Only the author of the recipe can update it.
+        */
         if (recipe.author.toString() !== req.user.id) {
             return res.status(403).json({ message: "You are not authorized to update this recipe" });
         }
 
+        //This prevents users from updating fields they should not touch
+       //(like _id, author, likesCount, likedBy, timestamps, etc.) 
+     
         const allowedFields = [
             "title", "description", "ingredients", "steps",
             "nutrition", "cookTime", "difficulty",
             "category", "images", "isPublic"
         ];
 
+    
+       /*
+       Loop through each allowed field. If the user included it in the request body,
+       update that field on the recipe.
+       empty string " " or 0 or false might be valid values
+       and shouldn’t be ignored.
+       */  
         allowedFields.forEach(field => {
             if (req.body[field] !== undefined) {
                 recipe[field] = req.body[field];
@@ -204,6 +280,7 @@ export const updateRecipe = async (req, res) => {
         });
 
         await recipe.save();
+
         const updatedRecipe = await Recipe.findById(recipeId)
             .populate("author", "username email")
             .populate("category", "name");
@@ -214,6 +291,8 @@ export const updateRecipe = async (req, res) => {
         res.status(500).json({ message: "Server error", error: error.message });
     }
 };
+
+
 
 export const deleteRecipe = async (req, res) => {
     try {
@@ -244,20 +323,21 @@ export const deleteRecipe = async (req, res) => {
 
 
 
-// --- Add recipe to favorites ---
+// Allows a user to “favorite” a recipe once, preventing duplicates.
 export const addFavorite = async (req, res) => {
     try {
         const { recipeId } = req.params;
-        const { userId } = req.body;
+        const userId = req.user?.id;
 
         if (!userId) {
-            return res.status(400).json({ message: "Missing userId" });
+            return res.status(401).json({ message: "Not authorized" });
         }
 
         const recipe = await Recipe.findById(recipeId);
         if (!recipe) return res.status(404).json({ message: "Recipe not found" });
 
         // Prevent duplicates
+        //favoritedBy is an array inside the recipe document.
         if (recipe.favoritedBy.includes(userId)) {
             return res.status(400).json({ message: "Already favorited" });
         }
@@ -277,15 +357,24 @@ export const addFavorite = async (req, res) => {
 export const removeFavorite = async (req, res) => {
     try {
         const { recipeId } = req.params;
-        const { userId } = req.body;
+        const userId = req.user?.id;
 
         if (!userId) {
-            return res.status(400).json({ message: "Missing userId" });
+            return res.status(401).json({ message: "Not authorized" });
         }
 
+
+        //A Mongoose query that returns a Promise.
         const recipe = await Recipe.findById(recipeId);
         if (!recipe) return res.status(404).json({ message: "Recipe not found" });
 
+        /*
+        filter() creates a new array by keeping only elements that pass a condition.
+        Here, we keep only those user IDs that are NOT equal to the given userId.
+        This effectively removes the userId from the favoritedBy array.
+        For each element in the array:
+        - If the element's string representation is NOT equal to userId, it is kept.
+        */
         recipe.favoritedBy = recipe.favoritedBy.filter(
             (id) => id.toString() !== userId
         );

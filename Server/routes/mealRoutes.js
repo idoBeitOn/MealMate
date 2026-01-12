@@ -5,19 +5,20 @@ import {
     updateMeal,
     deleteMeal
 } from "../controllers/mealController.js";
+import { authMiddleware } from "../middleware/authMiddleware.js";
 
 const mealRoutes = express.Router();
 
-// Create a meal slot
-mealRoutes.post("/", createMeal);
+// Create a meal slot for the authenticated user
+mealRoutes.post("/", authMiddleware, createMeal);
 
-// Get all meals for a user (can pass userId as query or from auth later)
-mealRoutes.get("/:userId", getMealsForUser);
+// Get all meals for the authenticated user
+mealRoutes.get("/", authMiddleware, getMealsForUser);
 
-// Update a meal
-mealRoutes.put("/:mealId", updateMeal);
+// Update a meal owned by the authenticated user
+mealRoutes.put("/:mealId", authMiddleware, updateMeal);
 
-// Delete a meal
-mealRoutes.delete("/:mealId", deleteMeal);
+// Delete a meal owned by the authenticated user
+mealRoutes.delete("/:mealId", authMiddleware, deleteMeal);
 
 export default mealRoutes;

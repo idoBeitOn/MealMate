@@ -3,8 +3,10 @@ import Meal from "../models/MealModel.js";
 // --- Create a meal ---
 export const createMeal = async (req, res) => {
     try {
-        const { userId, dayOfWeek, timeSlot, recipeId, customName, notes } = req.body;
+        const userId = req.user?.id;
+        const { dayOfWeek, timeSlot, recipeId, customName, notes } = req.body;
 
+        // userId comes from JWT; dayOfWeek and timeSlot must be provided
         if (!userId || dayOfWeek === undefined || timeSlot === undefined) {
             return res.status(400).json({ message: "Missing required fields" });
         }
@@ -21,6 +23,10 @@ export const createMeal = async (req, res) => {
         res.status(201).json({ message: "Meal created successfully", meal });
 
     } catch (error) {
+        /*
+        MongoDB duplicate key error → Happens when a unique index is violated.  
+        A user cannot have two meals on the same day and time slot.
+        */
         if (error.code === 11000) {
             return res.status(409).json({
                 message: "Meal slot already taken (day + timeSlot must be unique)"
@@ -31,10 +37,22 @@ export const createMeal = async (req, res) => {
     }
 };
 
+
+
 // --- Get all meals for a user ---
+
+/*
+populate() tells Mongoose:
+“Instead of giving me just the ID reference stored in the document, go fetch the actual related document
+ from the other collection.”
+A way to automatically fetch related documents
+✔ Equivalent to a JOIN in SQL
+✔ Replaces ObjectId references with full objects
+✔ Lets you pick only specific fields
+*/
 export const getMealsForUser = async (req, res) => {
     try {
-        const { userId } = req.params;
+        const userId = req.user?.id;
 
         const meals = await Meal.find({ userId })
             .populate("recipeId", "title images cookTime");
@@ -50,14 +68,20 @@ export const getMealsForUser = async (req, res) => {
 export const updateMeal = async (req, res) => {
     try {
         const { mealId } = req.params;
-        const updateData = req.body;
+        const updateData = { ...req.body };
+        const userId = req.user?.id;
 
-        const updated = await Meal.findByIdAndUpdate(mealId, updateData, {
-            new: true
-        });
+        // Never allow changing ownership
+        delete updateData.userId;
+
+        const updated = await Meal.findOneAndUpdate(
+            { _id: mealId, userId },
+            updateData,
+            { new: true }
+        );
 
         if (!updated) {
-            return res.status(404).json({ message: "Meal not found" });
+            return res.status(404).json({ message: "Meal not found or not owned by user" });
         }
 
         res.status(200).json({ message: "Meal updated", meal: updated });
@@ -77,11 +101,12 @@ export const updateMeal = async (req, res) => {
 export const deleteMeal = async (req, res) => {
     try {
         const { mealId } = req.params;
+        const userId = req.user?.id;
 
-        const deleted = await Meal.findByIdAndDelete(mealId);
+        const deleted = await Meal.findOneAndDelete({ _id: mealId, userId });
 
         if (!deleted) {
-            return res.status(404).json({ message: "Meal not found" });
+            return res.status(404).json({ message: "Meal not found or not owned by user" });
         }
 
         res.status(200).json({ message: "Meal deleted successfully" });
