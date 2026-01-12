@@ -1,16 +1,26 @@
 import ShoppingList from "../models/ShoppingListModel.js";
 import Meal from "../models/MealModel.js";
-import Recipe from "../models/RecipeModel.js";
 
 // --- Generate shopping list from meals ---
 export const generateShoppingList = async (req, res) => {
     try {
-        const { userId } = req.params;
+        const userId = req.user?.id;
 
-        // מביא את כל הארוחות של המשתמש
+        if (!userId) {
+            return res.status(401).json({ message: "Authentication required" });
+        }
+
+        /*
+        Meal.find({ userId }) → gets all meals for this user
+        .populate("recipeId", "ingredients") → for each meal, replaces the recipeId reference with the actual recipe object,
+        but only including ingredients.
+        */
         const meals = await Meal.find({ userId }).populate("recipeId", "ingredients");
 
-        // אוסף את כל המצרכים
+        /*
+        itemsMap is a plain JavaScript object used to deduplicate ingredients.
+        all ingredients are collected once, even if multiple meals contain the same ingredient.
+        */
         const itemsMap = {};
         meals.forEach(meal => {
             if (meal.recipeId && meal.recipeId.ingredients) {
@@ -23,11 +33,16 @@ export const generateShoppingList = async (req, res) => {
             }
         });
 
-        // יוצר או מעדכן רשימה
+       /*
+       findOneAndUpdate:
+       Finds existing shopping list for the user
+       Updates items with the collected ingredients
+       */
         const shoppingList = await ShoppingList.findOneAndUpdate(
             { user: userId },
-            { items: Object.values(itemsMap) },
-            { new: true, upsert: true }
+            { items: Object.values(itemsMap) },//converts the map into an array for MongoDB Options
+            { new: true, upsert: true }//new: true → return the updated document instead of the old one
+                                       //upsert: true → create a new document if none exists
         );
 
         res.status(200).json(shoppingList);
@@ -41,8 +56,12 @@ export const generateShoppingList = async (req, res) => {
 // --- Add manual item ---
 export const addManualItem = async (req, res) => {
     try {
-        const { userId } = req.params;
+        const userId = req.user?.id;
         const { name, amount } = req.body;
+
+        if (!userId) {
+            return res.status(401).json({ message: "Authentication required" });
+        }
 
         if (!name) return res.status(400).json({ message: "Item name is required" });
 
@@ -62,7 +81,12 @@ export const addManualItem = async (req, res) => {
 // --- Delete item ---
 export const deleteItem = async (req, res) => {
     try {
-        const { userId, itemId } = req.params;
+        const { itemId } = req.params;
+        const userId = req.user?.id;
+
+        if (!userId) {
+            return res.status(401).json({ message: "Authentication required" });
+        }
 
         const list = await ShoppingList.findOneAndUpdate(
             { user: userId },
@@ -80,7 +104,12 @@ export const deleteItem = async (req, res) => {
 // --- Toggle purchased status ---
 export const togglePurchased = async (req, res) => {
     try {
-        const { userId, itemId } = req.params;
+        const { itemId } = req.params;
+        const userId = req.user?.id;
+
+        if (!userId) {
+            return res.status(401).json({ message: "Authentication required" });
+        }
 
         const list = await ShoppingList.findOne({ user: userId });
         if (!list) return res.status(404).json({ message: "Shopping list not found" });

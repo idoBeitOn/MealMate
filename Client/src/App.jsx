@@ -1,19 +1,21 @@
 import { useState } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import AuthForm from "./components/AuthForm";
+import Feed from "./components/Feed"; // זה הקומפוננט החדש שתיצור
 
 function App() {
   const [authType, setAuthType] = useState("login"); // או "register"
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center">
-      <AuthForm type={authType} />
-      <button
-        className="mt-4 text-blue-500 underline"
-        onClick={() => setAuthType(authType === "login" ? "register" : "login")}
-      >
-        {authType === "login" ? "Switch to Register" : "Switch to Login"}
-      </button>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route
+          path="/"
+          element={<AuthForm type={authType} setAuthType={setAuthType} />}
+        />
+        <Route path="/feed" element={<Feed />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

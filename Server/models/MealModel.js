@@ -43,6 +43,11 @@ const mealSchema = new mongoose.Schema({
 });
 
 // prevents duplicate assignments
+/*
+Creates a compound index on userId + dayOfWeek + timeSlot
+unique: true → ensures a user cannot have two meals in the same slot on the same day
+1 → ascending order in the index (just a technical detail for MongoDB)
+*/
 mealSchema.index(
     { userId: 1, dayOfWeek: 1, timeSlot: 1 },
     { unique: true }
