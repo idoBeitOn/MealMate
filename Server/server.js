@@ -8,9 +8,18 @@ import commentRoutes from "./routes/commentRoutes.js";
 import mealRouter from "./routes/mealRoutes.js";
 import shoppingListrouter from "./routes/shoppingListroutes.js"
 import { errorHandler } from './middleware/errorHandler.js';
+import { validateEnv } from './config/envValidation.js';
 
 dotenv.config(); // Load environment variables from .env file
 //reads variables like PORT or MONGO_URI from .env
+
+// Validate required environment variables
+try {
+  validateEnv();
+} catch (error) {
+  console.error('Environment validation failed:', error.message);
+  process.exit(1);
+}
 
 
 const app = express();// Create an Express application - the actual server
@@ -44,6 +53,17 @@ app.use("/api/shopping-list", shoppingListrouter);
 
 app.get("/", (req, res) => { //
   res.send("MealMate backend is running!");
+});
+
+// Health check endpoint
+app.get("/health", (req, res) => {
+  const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
+  res.status(200).json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    database: dbStatus,
+    uptime: process.uptime()
+  });
 });
 
 // Error handling middleware (must be after all routes)
