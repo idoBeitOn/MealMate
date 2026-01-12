@@ -1,5 +1,6 @@
 import express from 'express';
 import { login, register } from '../controllers/authController.js';
+import { validateAuth } from '../middleware/validation.js';
 
 
 
@@ -7,11 +8,11 @@ import { login, register } from '../controllers/authController.js';
 
 const authRouter = express.Router();
 
-//POST /register → when the client sends registration data, register function handles it.
-authRouter.post('/register', register);
+//POST /register → when the client sends registration data, validate and then register.
+authRouter.post('/register', validateAuth('register'), register);
 
-//POST /login → when the client sends login data, login function handles it.
-authRouter.post('/login', login);
+//POST /login → when the client sends login data, validate and then login.
+authRouter.post('/login', validateAuth('login'), login);
 
 
 

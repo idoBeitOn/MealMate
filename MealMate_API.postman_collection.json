@@ -1,0 +1,642 @@
+{
+	"info": {
+		"name": "MealMate API",
+		"description": "Complete API collection for MealMate - Meal planning and recipe sharing application",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Health Check",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health",
+							"host": ["{{base_url}}"],
+							"path": ["health"]
+						},
+						"description": "Check server health and database connection status"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set(\"token\", jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"testuser\",\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "register"]
+						},
+						"description": "Register a new user account"
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set(\"token\", jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "login"]
+						},
+						"description": "Login with email and password"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Recipes",
+			"item": [
+				{
+					"name": "Create Recipe",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Chicken Curry\",\n  \"description\": \"Delicious spicy chicken curry\",\n  \"ingredients\": [\n    {\n      \"name\": \"Chicken\",\n      \"amount\": \"500g\"\n    },\n    {\n      \"name\": \"Curry Powder\",\n      \"amount\": \"2 tbsp\"\n    }\n  ],\n  \"steps\": [\n    \"Heat oil in pan\",\n    \"Add chicken and cook\",\n    \"Add curry powder\",\n    \"Simmer for 20 minutes\"\n  ],\n  \"nutrition\": {\n    \"calories\": 350,\n    \"fat\": 15,\n    \"carbohydrates\": 10,\n    \"protein\": 40\n  },\n  \"cookTime\": 30,\n  \"difficulty\": \"medium\",\n  \"isPublic\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/recipes",
+							"host": ["{{base_url}}"],
+							"path": ["api", "recipes"]
+						},
+						"description": "Create a new recipe (requires authentication)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Recipes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/recipes",
+							"host": ["{{base_url}}"],
+							"path": ["api", "recipes"]
+						},
+						"description": "Get all public recipes (no authentication required)"
+					},
+					"response": []
+				},
+				{
+					"name": "Search Recipes",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/recipes/search?q=chicken&difficulty=easy&maxCookTime=30&sortBy=likes",
+							"host": ["{{base_url}}"],
+							"path": ["api", "recipes", "search"],
+							"query": [
+								{
+									"key": "q",
+									"value": "chicken",
+									"description": "Search query"
+								},
+								{
+									"key": "difficulty",
+									"value": "easy",
+									"description": "Filter by difficulty (easy, medium, hard)"
+								},
+								{
+									"key": "maxCookTime",
+									"value": "30",
+									"description": "Maximum cook time in minutes"
+								},
+								{
+									"key": "sortBy",
+									"value": "likes",
+									"description": "Sort by: likes, createdAt, trending"
+								}
+							]
+						},
+						"description": "Search recipes with filters (requires authentication)"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Recipe",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Updated Chicken Curry\",\n  \"description\": \"Updated description\",\n  \"cookTime\": 35\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/recipes/:id",
+							"host": ["{{base_url}}"],
+							"path": ["api", "recipes", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "RECIPE_ID_HERE"
+								}
+							]
+						},
+						"description": "Update a recipe (only recipe author can update)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Recipe",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/recipes/:id",
+							"host": ["{{base_url}}"],
+							"path": ["api", "recipes", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "RECIPE_ID_HERE"
+								}
+							]
+						},
+						"description": "Delete a recipe (only recipe author can delete)"
+					},
+					"response": []
+				},
+				{
+					"name": "Like Recipe",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/recipes/:id/like",
+							"host": ["{{base_url}}"],
+							"path": ["api", "recipes", ":id", "like"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "RECIPE_ID_HERE"
+								}
+							]
+						},
+						"description": "Toggle like on a recipe (requires authentication)"
+					},
+					"response": []
+				},
+				{
+					"name": "Add Favorite",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userId\": \"USER_ID_HERE\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/recipes/:id/favorite",
+							"host": ["{{base_url}}"],
+							"path": ["api", "recipes", ":id", "favorite"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "RECIPE_ID_HERE"
+								}
+							]
+						},
+						"description": "Add recipe to favorites (requires authentication)"
+					},
+					"response": []
+				},
+				{
+					"name": "Remove Favorite",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userId\": \"USER_ID_HERE\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/recipes/:id/favorite",
+							"host": ["{{base_url}}"],
+							"path": ["api", "recipes", ":id", "favorite"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "RECIPE_ID_HERE"
+								}
+							]
+						},
+						"description": "Remove recipe from favorites (requires authentication)"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Comments",
+			"item": [
+				{
+					"name": "Add Comment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"recipeId\": \"RECIPE_ID_HERE\",\n  \"text\": \"This recipe looks amazing!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/comments",
+							"host": ["{{base_url}}"],
+							"path": ["api", "comments"]
+						},
+						"description": "Add a comment to a recipe (requires authentication)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Comments by Recipe",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/comments/:recipeId",
+							"host": ["{{base_url}}"],
+							"path": ["api", "comments", ":recipeId"],
+							"variable": [
+								{
+									"key": "recipeId",
+									"value": "RECIPE_ID_HERE"
+								}
+							]
+						},
+						"description": "Get all comments for a recipe (no authentication required)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Comment",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/comments/:commentId",
+							"host": ["{{base_url}}"],
+							"path": ["api", "comments", ":commentId"],
+							"variable": [
+								{
+									"key": "commentId",
+									"value": "COMMENT_ID_HERE"
+								}
+							]
+						},
+						"description": "Delete a comment (only comment author can delete)"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Meals",
+			"item": [
+				{
+					"name": "Create Meal",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"dayOfWeek\": 0,\n  \"timeSlot\": 0,\n  \"recipeId\": \"RECIPE_ID_HERE\",\n  \"customName\": null,\n  \"notes\": \"Dinner with family\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/meals",
+							"host": ["{{base_url}}"],
+							"path": ["api", "meals"]
+						},
+						"description": "Create a meal slot in the calendar (requires authentication)\n\ndayOfWeek: 0-6 (Sunday-Saturday)\ntimeSlot: 0-10 (meal time slots)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Meals",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/meals",
+							"host": ["{{base_url}}"],
+							"path": ["api", "meals"]
+						},
+						"description": "Get all meals for the authenticated user"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Meal",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"recipeId\": \"NEW_RECIPE_ID_HERE\",\n  \"notes\": \"Updated notes\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/meals/:mealId",
+							"host": ["{{base_url}}"],
+							"path": ["api", "meals", ":mealId"],
+							"variable": [
+								{
+									"key": "mealId",
+									"value": "MEAL_ID_HERE"
+								}
+							]
+						},
+						"description": "Update a meal (only meal owner can update)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Meal",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/meals/:mealId",
+							"host": ["{{base_url}}"],
+							"path": ["api", "meals", ":mealId"],
+							"variable": [
+								{
+									"key": "mealId",
+									"value": "MEAL_ID_HERE"
+								}
+							]
+						},
+						"description": "Delete a meal (only meal owner can delete)"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Shopping List",
+			"item": [
+				{
+					"name": "Generate Shopping List",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/shopping-list",
+							"host": ["{{base_url}}"],
+							"path": ["api", "shopping-list"]
+						},
+						"description": "Generate shopping list from user's meals (requires authentication)"
+					},
+					"response": []
+				},
+				{
+					"name": "Add Manual Item",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Milk\",\n  \"amount\": \"1 liter\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/shopping-list/items",
+							"host": ["{{base_url}}"],
+							"path": ["api", "shopping-list", "items"]
+						},
+						"description": "Add a manual item to shopping list (requires authentication)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Item",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/shopping-list/items/:itemId",
+							"host": ["{{base_url}}"],
+							"path": ["api", "shopping-list", "items", ":itemId"],
+							"variable": [
+								{
+									"key": "itemId",
+									"value": "ITEM_ID_HERE"
+								}
+							]
+						},
+						"description": "Delete an item from shopping list (requires authentication)"
+					},
+					"response": []
+				},
+				{
+					"name": "Toggle Purchased",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/shopping-list/items/:itemId/toggle",
+							"host": ["{{base_url}}"],
+							"path": ["api", "shopping-list", "items", ":itemId", "toggle"],
+							"variable": [
+								{
+									"key": "itemId",
+									"value": "ITEM_ID_HERE"
+								}
+							]
+						},
+						"description": "Toggle purchased status of an item (requires authentication)"
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
