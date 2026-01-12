@@ -7,6 +7,7 @@ import recipesRouter from './routes/recipeRoutes.js';
 import commentRoutes from "./routes/commentRoutes.js";
 import mealRouter from "./routes/mealRoutes.js";
 import shoppingListrouter from "./routes/shoppingListroutes.js"
+import { errorHandler } from './middleware/errorHandler.js';
 
 dotenv.config(); // Load environment variables from .env file
 //reads variables like PORT or MONGO_URI from .env
@@ -41,12 +42,12 @@ app.use("/api/meals", mealRouter);
 
 app.use("/api/shopping-list", shoppingListrouter);
 
-
-
-
 app.get("/", (req, res) => { //
   res.send("MealMate backend is running!");
 });
+
+// Error handling middleware (must be after all routes)
+app.use(errorHandler);
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
